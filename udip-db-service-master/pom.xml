@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>orr.gn.udip.connect</groupId>
+	<artifactId>UDIP_Connect1</artifactId>
+	<version>1.0.0</version>
+	<packaging>war</packaging>
+
+	<name>UDIP_Connect1</name>
+	<description>Rest API for UDIP</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.6.RELEASE</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<hibernate.version>5.2.11.Final</hibernate.version>
+		<hibernate.search.version>5.8.1.Final</hibernate.search.version>
+		<sonar.sources>src/main</sonar.sources>
+		<sonar.tests>src/test</sonar.tests>
+		<sonar.coverage.exclusions>
+			**/model/*,
+			**/EmailService.java,
+			**/ScheduledService.java,
+			**/AppProperties.java,
+			**/ValidationException.java,
+			**/MailerException.java,
+			**/ExceptionControllerAdvice.java,
+			**/Email.java,
+			**/NotificationLevelEnum.java,
+			**/ServiceNotification.java,
+			**/NotificationController.java,
+			**/UserNotification.java,
+			**/UDIPSQLConnectMain.java
+		</sonar.coverage.exclusions>
+		<!-- Sonar-JaCoCo properties -->
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.jacoco.reportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.reportPath>
+		<sonar.language>java</sonar.language>
+	</properties>
+
+	<!-- Profiles configuration -->
+	<profiles>
+		<!-- The configuration of the development profile -->
+		
+		<profile>
+			<id>local</id>
+			<!-- The Local profile is active by default -->
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<activatedProperties>local</activatedProperties>
+			</properties>
+
+		</profile>
+		
+		<profile>
+			<id>dev</id>
+			<!-- The development profile is active by default -->
+			<!-- <activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>  -->
+			<properties>
+				<activatedProperties>dev</activatedProperties>
+			</properties>
+
+		</profile>
+
+		<!-- The configuration of the production profile -->
+		<profile>
+			<id>prod</id>
+			<properties>
+				<activatedProperties>prod</activatedProperties>
+			</properties>
+
+			<dependencies>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-web</artifactId>
+					<exclusions>
+						<exclusion>
+							<artifactId>spring-boot-starter-tomcat</artifactId>
+							<groupId>org.springframework.boot</groupId>
+						</exclusion>
+					</exclusions>
+				</dependency>
+				<dependency>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+					<version>3.1.0</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+
+		<profile>
+			<id>sonar</id>
+			<properties>
+				<!-- Optional URL to server. Default value is http://localhost:9000 -->
+				<!-- <sonar.host.url> http://192.168.2.174:9000 </sonar.host.url> -->
+			</properties>
+		</profile>
+	</profiles>
+
+	<dependencies>
+	
+		<!-- Sonar-maven-plugin -->
+		<dependency>
+			<groupId>org.sonarsource.scanner.maven</groupId>
+			<artifactId>sonar-maven-plugin</artifactId>
+			<version>3.2</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		
+		<!-- Search dependencies - START -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-elasticsearch</artifactId>
+			<version>${hibernate.search.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-orm</artifactId>
+			<version>${hibernate.search.version}</version>
+		</dependency>
+		<!-- Search dependencies - END -->
+		
+
+		<!-- Avro Dependency for generating avro schema -->
+		<dependency>
+			<groupId>org.apache.avro</groupId>
+			<artifactId>avro</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<!--<dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> 
+			<version>4.11</version> <scope>test</scope> </dependency> -->
+
+		<!-- TestNG dependency -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.4</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.194</version>
+			<scope>test</scope>
+		</dependency>
+	
+		<!-- Google gson maven dependency for Javaobj-Json-Javaobj conversion -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.0</version>
+		</dependency>
+		
+		<!-- Java Simplified Encryption Dependency -->
+		<dependency>
+            <groupId>com.github.ulisesbocchio</groupId>
+            <artifactId>jasypt-spring-boot-starter</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+	</dependencies>
+
+
+	<build>
+		<finalName>UDIPDBS</finalName>
+
+		<resources>
+			<resource>
+				<filtering>true</filtering>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			
+			<!-- Sonar-JaCoCo integration plugin -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.6.201602180812</version>
+				<configuration>
+					<destFile>${sonar.jacoco.reportPath}</destFile>
+					<append>true</append>
+					<excludes>
+						<exclude>**/model/*.class</exclude>
+						<exclude>**/*EmailService.*</exclude>
+				        <exclude>**/*ScheduledService.*</exclude>
+				        <exclude>**/*AppProperties.*</exclude>
+				        <exclude>**/*ValidationException.*</exclude>
+				        <exclude>**/*MailerException.*</exclude>
+				        <exclude>**/*ExceptionControllerAdvice.*</exclude>
+				        <exclude>**/*Email.*</exclude>
+				        <exclude>**/*NotificationLevelEnum.*</exclude>
+				        <exclude>**/*ServiceNotification.*</exclude>
+				        <exclude>**/*NotificationController.*</exclude>
+				        <exclude>**/*UserNotification.*</exclude>
+				        <exclude>**/*UDIPSQLConnectMain.*</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/jacoco-ut</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- <plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/jacoco-ut</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<systemPropertyVariables>
+						<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
+					</systemPropertyVariables>
+				    <excludes>
+				        <exclude>**/*EmailService.*</exclude>
+				        <exclude>**/*ScheduledService.*</exclude>
+				        <exclude>**/*AppProperties.*</exclude>
+				        <exclude>**/*ValidationException.*</exclude>
+				        <exclude>**/*ExceptionControllerAdvice.*</exclude>
+				        <exclude>**/*Email.*</exclude>
+				        <exclude>**/*NotificationLevelEnum.*</exclude>
+				        <exclude>**/*ServiceNotification.*</exclude>
+				        <exclude>**/*NotificationController.*</exclude>
+				        <exclude>**/*UserNotification.*</exclude>
+				        
+				        <exclude>**/*UDIPSQLConnectMain.*</exclude>
+				    </excludes>
+				</configuration>
+			</plugin> -->
+			
+			<!-- <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                       <id>default-prepare-agent</id>
+                       <goals>
+                           <goal>prepare-agent</goal>
+                       </goals>
+                    </execution>
+                    <execution>
+                        <id>default-report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                            
+                        </goals>
+                        <configuration>
+							<outputDirectory>target/jacoco-ut</outputDirectory>
+						</configuration>
+                    </execution>
+                </executions>
+            </plugin> -->
+            
+            
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.21.0</version>
+				<configuration>
+					<suiteXmlFiles>
+						<suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+					</suiteXmlFiles>
+				</configuration>
+			</plugin>
+		</plugins>
+
+
+	</build>
+
+
+
+</project>
